@@ -28,12 +28,15 @@ class Form(StatesGroup):
 # /start uchun javob
 @dp.message(CommandStart())
 async def start_handler(message: types.Message):
-    await message.answer_sticker('CAACAgIAAxkBAAEbsGRnJ8o8shwIMav0QC1S9O6nNIC7tQACmQwAAj9UAUrPkwx5a8EilDYE')
+    await message.answer_sticker(
+        "CAACAgIAAxkBAAEbsGRnJ8o8shwIMav0QC1S9O6nNIC7tQACmQwAAj9UAUrPkwx5a8EilDYE"
+    )
     is_subscribed = await check_subscribe(bot=bot, user_id=message.from_user.id)
 
     if not is_subscribed:
         await message.answer(
-            "Bo'tdan foydalanish uchun quyidagi kanallarga obuna bo'ling va /start buyrug'ini yuboring‼️ \n 👇👇👇👇👇", reply_markup=channel_list
+            "Bo'tdan foydalanish uchun quyidagi kanallarga obuna bo'ling va /start buyrug'ini yuboring‼️ \n 👇👇👇👇👇",
+            reply_markup=channel_list,
         )
         return
 
@@ -65,7 +68,8 @@ async def help_handler(message: types.Message):
 
     if not is_subscribed:
         await message.answer(
-            "Bo'tdan foydalanish uchun quyidagi kanallarga obuna bo'ling va /start buyrug'ini yuboring‼️ \n 👇👇👇👇👇", reply_markup=channel_list
+            "Bo'tdan foydalanish uchun quyidagi kanallarga obuna bo'ling va /start buyrug'ini yuboring‼️ \n 👇👇👇👇👇",
+            reply_markup=channel_list,
         )
         return
     text = (
@@ -83,15 +87,16 @@ async def start_form(message: types.Message, state: FSMContext):
 
     if not is_subscribed:
         await message.answer(
-            "Bo'tdan foydalanish uchun quyidagi kanallarga obuna bo'ling va /start buyrug'ini yuboring‼️ \n 👇👇👇👇👇", reply_markup=channel_list
+            "Bo'tdan foydalanish uchun quyidagi kanallarga obuna bo'ling va /start buyrug'ini yuboring‼️ \n 👇👇👇👇👇",
+            reply_markup=channel_list,
         )
         return
     await message.answer(
-        "<i>Hozir sizga bir nechta savollar beriladi.</i>\n<b>Har bit savolga to'g'ri javob bering‼️ </b>",
+        "<i>Hozir sizga bir nechta savollar beriladi.</i>\n<b>Har bir savolga to'g'ri javob bering‼️ </b>",
         parse_mode="HTML",
     )
     await message.answer(
-        "<b>Ism, familiyangizni kiriting!</b>",
+        "<b>🥷🏻 Ism</b>\n\n <i>Ism, familiyangizni</i> <u>Toshmat, Eshmatov</u> <i>ko'rinishida yuboring!</i>",
         reply_markup=types.ReplyKeyboardRemove(),
         parse_mode="HTML",
     )
@@ -105,11 +110,15 @@ async def update_name(message: types.Message, state: FSMContext):
 
     if not is_subscribed:
         await message.answer(
-            "Bo'tdan foydalanish uchun quyidagi kanallarga obuna bo'ling va /start buyrug'ini yuboring‼️ \n 👇👇👇👇👇", reply_markup=channel_list
+            "Bo'tdan foydalanish uchun quyidagi kanallarga obuna bo'ling va /start buyrug'ini yuboring‼️ \n 👇👇👇👇👇",
+            reply_markup=channel_list,
         )
         return
     await state.update_data(name=message.text)
-    await message.answer("🕐 <b>Yoshingizni kiriting!</b>", parse_mode="HTML")
+    await message.answer(
+        "🕐 <b>Yosh \n\n</b><b>Yoshingizni <u>16</u> formatida yuboring!</b>",
+        parse_mode="HTML",
+    )
     await state.set_state(Form.age)
 
 
@@ -119,12 +128,13 @@ async def update_age(message: types.Message, state: FSMContext):
 
     if not is_subscribed:
         await message.answer(
-            "Bo'tdan foydalanish uchun quyidagi kanallarga obuna bo'ling va /start buyrug'ini yuboring‼️ \n 👇👇👇👇👇", reply_markup=channel_list
+            "Bo'tdan foydalanish uchun quyidagi kanallarga obuna bo'ling va /start buyrug'ini yuboring‼️ \n 👇👇👇👇👇",
+            reply_markup=channel_list,
         )
         return
     await state.update_data(age=message.text)
     await message.answer(
-        "📞 <b>Telefon raqamingizni kiriting!</b>",
+        "📞 <b>Telefon</b> \n\n<i>Siz bilan bog'lanish uchun telefon raqamingizni <u>+998931234567</u> formatida yuboring yoki pastdagi tugmani bosing!</i>",
         parse_mode="HTML",
         reply_markup=contact_send_btn,
     )
@@ -137,11 +147,20 @@ async def update_phone(message: types.Message, state: FSMContext):
 
     if not is_subscribed:
         await message.answer(
-            "Bo'tdan foydalanish uchun quyidagi kanallarga obuna bo'ling va /start buyrug'ini yuboring‼️ \n 👇👇👇👇👇", reply_markup=channel_list
+            "Bo'tdan foydalanish uchun quyidagi kanallarga obuna bo'ling va /start buyrug'ini yuboring‼️ \n 👇👇👇👇👇",
+            reply_markup=channel_list,
         )
         return
-    await state.update_data(phone=message.contact.phone_number)
-    print(message.contact.phone_number)
+    if message.contact:
+        phone_data = message.contact.phone_number
+    else:
+        phone_data = message.text
+
+    if not phone_data.startswith("+"):
+        phone_data = "+" + phone_data
+
+    await state.update_data(phone=phone_data)
+    print(phone_data)
 
     data = await state.get_data()
     name = data.get("name")
@@ -149,11 +168,11 @@ async def update_phone(message: types.Message, state: FSMContext):
     phone = data.get("phone")
 
     await message.answer(
-        f"<b>Ma'lumotnoma</b>\n"
-        f"<b>Ismi:</b> <i>{name}</i>\n"
-        f"<b>Yoshi:</b> <i>{age}</i>\n"
-        f"<b>Telefon:</b> <i>{phone}</i>\n"
-        f"<b>Telegram:</b> <i>@{message.from_user.username or message.from_user.full_name}</i>",
+        f"<b>ℹ️ Ma'lumotnoma</b>\n"
+        f"<b>🥷🏻 Ismi:</b> <i>{name}</i>\n"
+        f"<b>🕰 Yoshi:</b> <i>{age}</i>\n"
+        f"<b>☎️ Telefon:</b> <i>{phone}</i>\n"
+        f"<b>🧿 Telegram:</b> <i>@{message.from_user.username or message.from_user.full_name}</i>",
         parse_mode="HTML",
     )
     await message.answer("Bu ma'lumotlar to'g'rimi❓", reply_markup=user_access)
@@ -166,7 +185,8 @@ async def confirmation_fun(message: types.Message, state: FSMContext):
 
     if not is_subscribed:
         await message.answer(
-            "Bo'tdan foydalanish uchun quyidagi kanallarga obuna bo'ling va /start buyrug'ini yuboring‼️ \n 👇👇👇👇👇", reply_markup=channel_list
+            "Bo'tdan foydalanish uchun quyidagi kanallarga obuna bo'ling va /start buyrug'ini yuboring‼️ \n 👇👇👇👇👇",
+            reply_markup=channel_list,
         )
         return
     if message.text == "Ha":
@@ -177,11 +197,11 @@ async def confirmation_fun(message: types.Message, state: FSMContext):
 
         await bot.send_message(
             6150443453,
-            f"<b>Yangi ma'lumotlar:</b>\n"
-            f"<b>Ism:</b> <i>{name}</i>\n"
-            f"<b>Yosh:</b> <i>{age}</i>\n"
-            f"<b>Manzil:</b> <i>{phone}</i>\n"
-            f"<b>Telegram:</b> <i>@{message.from_user.username or message.from_user.full_name}</i>",
+            f"<b>🆕 Yangi ma'lumotlar:</b>\n"
+            f"<b>🥷🏻 Ism:</b> <i>{name}</i>\n"
+            f"<b>🕰 Yosh:</b> <i>{age}</i>\n"
+            f"<b>☎️ Telefon:</b> <i>{phone}</i>\n"
+            f"<b>🧿 Telegram:</b> <i>@{message.from_user.username or message.from_user.full_name}</i>",
             parse_mode="HTML",
         )
         await message.answer(
@@ -202,7 +222,8 @@ async def echo(message: types.Message, state: FSMContext):
 
     if not is_subscribed:
         await message.answer(
-            "Bo'tdan foydalanish uchun quyidagi kanallarga obuna bo'ling va /start buyrug'ini yuboring‼️ \n 👇👇👇👇👇", reply_markup=channel_list
+            "Bo'tdan foydalanish uchun quyidagi kanallarga obuna bo'ling va /start buyrug'ini yuboring‼️ \n 👇👇👇👇👇",
+            reply_markup=channel_list,
         )
         return
     if await state.get_state() is None:
